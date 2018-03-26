@@ -1,1 +1,2 @@
-# EBC_PROVES
+# 1RA_documentacio
+Manual del EBC.
