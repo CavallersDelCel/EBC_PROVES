@@ -137,7 +137,10 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_static_path = ['_static']
 
 def setup(app):
-app.add_stylesheet('css/custom.css')
+app.add_stylesheet('_static/css/custom.css')
+
+# def setup(app):
+# app.add_stylesheet('css/custom.css')
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
