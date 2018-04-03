@@ -5,4 +5,4 @@ Benvingut a l'Entrenament Bàsic de Combat, a partir d'ara, tens un compromís a
 
 Per poder completar el curs, hauràs de tenir el simulador al dia segons l'Estàndard del grup, si us plau repassa el paquet de Benvinguda o consulta al Personal del grup per qualsevol dubte.
 
-Això és una prova.
+Eliminarem la linia que hem posat abans.
