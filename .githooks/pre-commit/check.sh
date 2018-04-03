@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright (c) 2016-2018 Martin Donath <martin.donath@squidfunk.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,37 +20,42 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-import json
-from setuptools import setup, find_packages
+# Patch file to store unindexed changes
+PATCH_FILE=".working-tree.patch"
+MESSAGE="Terminated with errors"
 
-# Load package.json contents
-with open("package.json") as data:
-    package = json.load(data)
+# Revert changes that have been registered in the patch file
+function cleanup {
+  EXIT_CODE=$?
+  if [ -f "$PATCH_FILE" ]; then
+    git apply "$PATCH_FILE" 2> /dev/null
+    rm "$PATCH_FILE"
+  fi
+  exit $EXIT_CODE
+}
 
-# Load list of dependencies
-with open("requirements.txt") as data:
-    install_requires = [
-        line for line in data.read().split("\n")
-            if line and not line.startswith("#")
-    ]
+# Register signal handlers
+trap cleanup EXIT SIGINT SIGHUP
 
-# Package description
-setup(
-    name = package["name"],
-    version = package["version"],
-    url = package["homepage"],
-    license = package["license"],
-    description = package["description"],
-    author = package["author"]["name"],
-    author_email = package["author"]["email"],
-    keywords = package["keywords"],
-    packages = find_packages(),
-    include_package_data = True,
-    install_requires = install_requires,
-    entry_points = {
-        "mkdocs.themes": [
-            "material = material",
-        ]
-    },
-    zip_safe = False
-)
+# Cancel any changes to the working tree that are not going to be committed
+git diff > "$PATCH_FILE"
+git checkout -- .
+
+# Filter relevant files for linting
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | \
+  grep "\.\(js\|jsx\|scss\)$")
+
+# Run check and print indicator
+if [ "$FILES" ]; then
+
+  # If linter terminated with errors, abort commit
+  if [ $? -gt 0 ]; then
+    echo -e "\x1B[31m✗\x1B[0m Linter - \x1B[31m$MESSAGE\x1B[0m"
+    exit 1
+  else
+    echo -e "\x1B[32m✓\x1B[0m Linter"
+  fi
+fi
+
+# We're good
+exit 0

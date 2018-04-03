@@ -18,37 +18,34 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-import json
-from setuptools import setup, find_packages
+FROM jfloff/alpine-python:2.7-slim
+MAINTAINER Martin Donath <martin.donath@squidfunk.com>
 
-# Load package.json contents
-with open("package.json") as data:
-    package = json.load(data)
+# Set build directory
+WORKDIR /tmp
 
-# Load list of dependencies
-with open("requirements.txt") as data:
-    install_requires = [
-        line for line in data.read().split("\n")
-            if line and not line.startswith("#")
-    ]
+# Copy files necessary for build
+COPY material material
+COPY MANIFEST.in MANIFEST.in
+COPY package.json package.json
+COPY requirements.txt requirements.txt
+COPY setup.py setup.py
 
-# Package description
-setup(
-    name = package["name"],
-    version = package["version"],
-    url = package["homepage"],
-    license = package["license"],
-    description = package["description"],
-    author = package["author"]["name"],
-    author_email = package["author"]["email"],
-    keywords = package["keywords"],
-    packages = find_packages(),
-    include_package_data = True,
-    install_requires = install_requires,
-    entry_points = {
-        "mkdocs.themes": [
-            "material = material",
-        ]
-    },
-    zip_safe = False
-)
+# Perform build and cleanup artifacts
+RUN \
+  apk add --no-cache \
+    git \
+    git-fast-import \
+    openssh \
+  && python setup.py install 2>/dev/null \
+  && rm -rf /tmp/*
+
+# Set working directory
+WORKDIR /docs
+
+# Expose MkDocs development server port
+EXPOSE 8000
+
+# Start development server by default
+ENTRYPOINT ["mkdocs"]
+CMD ["serve", "--dev-addr=0.0.0.0:8000"]

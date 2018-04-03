@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright (c) 2016-2018 Martin Donath <martin.donath@squidfunk.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,37 +20,35 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-import json
-from setuptools import setup, find_packages
+# Exit, if there's no .travisignore file
+if [[ ! -a .travisignore ]]; then
+	exit
+fi
 
-# Load package.json contents
-with open("package.json") as data:
-    package = json.load(data)
+# Filter relevant files for linting
+FILES=$(git diff --cached --name-only)
 
-# Load list of dependencies
-with open("requirements.txt") as data:
-    install_requires = [
-        line for line in data.read().split("\n")
-            if line and not line.startswith("#")
-    ]
+# Resolve the patterns we want to skip
+BLACKLIST=$(< .travisignore)
 
-# Package description
-setup(
-    name = package["name"],
-    version = package["version"],
-    url = package["homepage"],
-    license = package["license"],
-    description = package["description"],
-    author = package["author"]["name"],
-    author_email = package["author"]["email"],
-    keywords = package["keywords"],
-    packages = find_packages(),
-    include_package_data = True,
-    install_requires = install_requires,
-    entry_points = {
-        "mkdocs.themes": [
-            "material = material",
-        ]
-    },
-    zip_safe = False
-)
+# Remove the pattern from the list of changes
+for f in $BLACKLIST; do
+	FILES=( ${FILES[@]/$f/} )
+
+  # If we've exhausted the list of changes before we've finished going
+  # through patterns, that's okay, just quit the loop
+	if [[ ${#FILES[@]} -eq 0 ]]; then
+		break
+	fi
+done
+
+# If there's changes left, then we have stuff to build, leave the commit alone
+if [[ ${#FILES[@]} -gt 0 ]]; then
+	exit
+fi
+
+# Don't build this commit
+sed -i '' '1s/$/ [ci skip]/' "$1"
+
+# We're good
+exit 0
