@@ -1,6 +1,9 @@
 Balística i fonaments de la punteria amb fusell
 ===============================================
 
+
+Hola bon dia.
+
 Cada jugador és, sobretot, un fuseller bàsic. Pots tenir planejat volar helicòpters, tancs , o actuar com un metge, però al final del dia necessites saber com manejar amb soltesa l'eina més bàsica de la infanteria: el fusell. Arribarà un moment en què serà l'únic que tindràs per salvar la teva vida virtual o la vida virtual d'un company d'equip.
 
 Els tancs poden quedar inoperatius, els helicòpters poden caure, els equips de morter poden ser atacats, en aquell moment, voldràs ser un fuseller eficaç per tu i els teus companys.
